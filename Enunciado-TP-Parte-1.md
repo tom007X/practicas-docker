@@ -47,6 +47,23 @@ de negocio.
   con 5 esquemas.
 - **Todo se despliega en una única instancia EC2 de AWS**, accesible **solo por HTTPS**.
 
+### Grupos de 5 integrantes
+
+Si el grupo es de 5, deben sumar un **7º microservicio: un segundo frontend** (`web2/`, con la
+tecnología que prefieran: React, Angular, HTML estático servido con NGINX, etc.). No hace falta
+que consuma las APIs; alcanza con que sea accesible. Reglas:
+
+- Lleva su propio `Dockerfile` y `.dockerignore` (multistage si necesita compilar), se sube a
+  Docker Hub (**7 imágenes** en total) y entra al `docker-compose.yml` con los mismos requisitos
+  que el resto: `env_file` si corresponde, network compartida, límites de recursos y
+  `restart: always`.
+- Se accede **solo por HTTPS**, igual que el resto del stack. Pueden exponerlo como una ruta del
+  NGINX de `web` (por ejemplo `/web2/`) o con un segundo puerto HTTPS publicado (443 u 8443).
+  Si eligen lo segundo, tiene que estar abierto en el Security Group y documentado. El puerto 80
+  sigue cerrado.
+- Se refleja en todo lo demás: diagrama de arquitectura, `deploy.sh`, `curl` de la sección
+  "Probar" y README del grupo.
+
 > 💡 **Este stack es un caso de referencia, no una obligación cerrada.** Pueden usar otros
 > microservicios, agregar/quitar alguno o construir su propio frontend, siempre que el resultado
 > siga demostrando lo mismo que se evalúa acá: dockerización correcta de varios servicios en
@@ -310,6 +327,8 @@ en ese momento — son las que van a documentar en el `README.md` y mostrar en l
   programado.
 - Grupos de 4 integrantes: es esperable que una persona sea responsable de dos microservicios;
   aun así, **todos deben poder explicar la arquitectura completa**, no solo su parte.
+- Grupos de 5 integrantes: deben **agregar un 7º microservicio, un segundo frontend** (ver
+  "Grupos de 5 integrantes" en "Arquitectura").
 
 ### Criterios de Evaluación
 - Funcionalidad del stack completo, verificada a través de la documentación y las capturas de
