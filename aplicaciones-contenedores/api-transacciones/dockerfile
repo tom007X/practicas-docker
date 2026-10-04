@@ -1,0 +1,40 @@
+# Etapa 1: Compilación con el SDK oficial de Go
+FROM golang:1.22-alpine AS build
+
+WORKDIR /src
+
+# Instalar certificados CA (necesarios si tu app hace llamadas HTTPS a APIs externas o bases de datos con TLS)
+RUN apk add --no-cache ca-certificates
+
+# Copiar dependencias primero para aprovechar la caché de Docker
+COPY go.mod go.sum* ./
+RUN go mod download
+
+# Copiar el código fuente
+COPY . .
+
+# Compilar un binario estático:
+# CGO_ENABLED=0 evita dependencias dinámicas de libc
+# GOOS=linux compila para el SO del contenedor
+# -ldflags="-w -s" elimina información de depuración para reducir drásticamente el peso
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /app/server .
+
+# Etapa 2: Imagen final ultra liviana
+FROM alpine:3.24.2 AS final
+
+WORKDIR /app
+
+# Traer los certificados SSL y crear un usuario no privilegiado
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Copiar el binario compilado
+COPY --from=build /app/server .
+
+USER appuser
+
+EXPOSE 8080
+
+ENTRYPOINT ["./server"]
+
+

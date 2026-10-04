@@ -1,0 +1,39 @@
+node_modules/
+venv/
+target/
+bin/
+obj/
+.git/
+.env
+
+# Git
+.git
+.gitignore
+
+# Compilados locales (deben compilarse dentro del Dockerfile, no venir del host)
+target/
+build/
+*.jar
+*.war
+
+# IDEs y configuración local
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Variables de entorno y secretos
+.env
+*.local
+*.key
+*.pem
+
+# Logs temporales
+logs/
+*.log
+
+
+README.md
+.env.example

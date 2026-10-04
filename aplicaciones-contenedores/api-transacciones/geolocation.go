@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"net/http"
 	"time"
 )
@@ -20,7 +21,10 @@ type geoResponse struct {
 // transaccion se guarda igual, sin el pais.
 func obtenerPais(ip string) string {
 	client := http.Client{Timeout: 5 * time.Second}
-	url := fmt.Sprintf("https://ipapi.co/%s/json/", ip)
+	geoKey := os.Getenv("GEO_KEY")
+	
+	// Formato limpio con especificadores %s:
+	url := fmt.Sprintf("https://api.ipapi.com/api/%s?access_key=%s", ip, geoKey)
 
 	resp, err := client.Get(url)
 	if err != nil {

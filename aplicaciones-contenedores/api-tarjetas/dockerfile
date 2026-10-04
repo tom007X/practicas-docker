@@ -1,0 +1,26 @@
+
+
+# Etapa : SDK para restaurar dependencias y compilar
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+WORKDIR /src
+
+# Copiar el csproj y restaurar paquetes (aprovecha la caché de Docker)
+COPY ["ApiTarjetas.csproj", "./"]
+RUN dotnet restore "ApiTarjetas.csproj"
+
+# Copiar el resto del código fuente y compilar en Release
+COPY . .
+RUN dotnet publish "ApiTarjetas.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+
+# Etapa: Runtime liviano para producción
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-noble-chiseled AS base
+WORKDIR /app
+EXPOSE 8080
+ENV ASPNETCORE_HTTP_PORTS=8080
+COPY --from=build /app/publish .
+
+# Usuario no root seguro por defecto en .NET 8
+USER $APP_UID
+
+ENTRYPOINT ["dotnet", "ApiTarjetas.dll"]
