@@ -1,0 +1,140 @@
+services:
+  web-1:
+    image: tomy0101/tp-devops-frontend:v.1.web-1
+    container_name: web_nginx
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '150M'
+    ports:
+      - "443:443"
+    networks:
+      - fintech_nova_frontend
+    
+  api-transacciones:
+    image: tomy0101/tp-devops-backend:v.1.api-transacciones
+    container_name: api-transacciones
+    restart: always
+    depends_on:
+      maria-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '550M'
+    env_file:
+      - ./api-transacciones/.env
+    networks:
+      - fintech_nova_backend
+      - fintech_nova_frontend
+      
+  api-tarjetas:
+    image: tomy0101/tp-devops-backend:v.1.api-tarjetas
+    container_name: api-tarjetas
+    restart: always
+    depends_on:
+      maria-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '550M'
+    env_file:
+      - ./api-tarjetas/.env
+    networks:
+      - fintech_nova_backend
+      - fintech_nova_frontend
+
+  api-clientes:
+    image: tomy0101/tp-devops-backend:v.1.api-clientes
+    container_name: api-clientes
+    restart: always
+    depends_on:
+      maria-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '550M'
+    env_file:
+      - ./api-clientes/.env
+    networks:
+      - fintech_nova_backend
+      - fintech_nova_frontend
+    
+  api-pagos:
+    image: tomy0101/tp-devops-backend:v.1.api-pagos
+    container_name: api-pagos
+    restart: always
+    depends_on:
+      maria-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '550M'
+    env_file:
+      - ./api-pagos/.env
+
+    networks:
+      - fintech_nova_backend
+      - fintech_nova_frontend
+
+  api-facturas:
+    image: tomy0101/tp-devops-backend:v.1.api-facturas
+    container_name: api-facturas
+    restart: always
+    depends_on:
+      maria-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '550M'
+    env_file:
+      - ./api-facturas/.env
+
+    networks:
+      - fintech_nova_backend
+      - fintech_nova_frontend
+
+
+  maria-db:
+    image: tomy0101/tp-devops-backend:v.1.db
+    container_name: maria_db
+    restart: always
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    env_file:
+      - ./db/.env
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '700M'
+        reservations:
+          cpus: '0.25'
+          memory: '100M'
+    volumes:
+      - maria_db_data:/var/lib/mysql
+    networks:
+      - fintech_nova_backend
+
+volumes:
+  maria_db_data:
+networks:
+  fintech_nova_backend:
+    driver: bridge
+  fintech_nova_frontend:
+    driver: bridge
